@@ -4,14 +4,11 @@ event log
 
 ## Installation
 
-
 ```sh
 npm install rn-event-log
 ```
 
-
 ## Usage
-
 
 ```js
 import { multiply } from 'rn-event-log';
@@ -20,7 +17,6 @@ import { multiply } from 'rn-event-log';
 
 const result = multiply(3, 7);
 ```
-
 
 ## Contributing
 

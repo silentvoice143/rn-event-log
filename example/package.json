@@ -9,7 +9,10 @@
     "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
     "build:ios": "react-native build-ios --mode Debug",
     "web": "vite",
-    "build:web": "vite build"
+    "build:web": "vite build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write"
   },
   "dependencies": {
     "react": "19.2.3",

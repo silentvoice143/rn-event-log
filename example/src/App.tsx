@@ -1,21 +1,20 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 
 import Analytics from 'rn-event-log';
+import { DebugOverlay } from './DebugOverlay';
 
 export default function App() {
   useEffect(() => {
-    Analytics.init({
-      debug: true,
-      flushInterval: 30,
-    });
+    Analytics.init();
 
     Analytics.startSession();
 
-    Analytics.track('app_opened', {
-      screen: 'Home',
-      platform: 'android',
-    });
+    Analytics.track('button_click');
+
+    Analytics.trackScreen('Home');
+
+    Analytics.trackScreen('Profile');
 
     Analytics.flush();
 
@@ -27,6 +26,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>RN Event Log Working 🚀</Text>
+      <DebugOverlay />
     </View>
   );
 }
