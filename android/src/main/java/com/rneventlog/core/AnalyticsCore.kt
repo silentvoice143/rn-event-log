@@ -7,6 +7,8 @@ import com.rneventlog.core.flush.FlushManager
 import com.rneventlog.core.navigation.ScreenTracker
 import com.rneventlog.core.queue.Event
 import com.rneventlog.core.queue.EventQueue
+import com.rneventlog.core.utils.ReactMapConverter
+import com.rneventlog.core.debug.DebugEmitter
 
 object AnalyticsCore {
 
@@ -21,14 +23,23 @@ object AnalyticsCore {
     event: String,
     properties: ReadableMap?
   ) {
+     DebugEmitter.emit(
+      "Track => $event"
+    )
+
+    DebugEmitter.emit(
+      "Properties => ${properties?.toHashMap()}"
+    )
 
     DebugLogger.log(
     "Native Track => $event"
    )
+   val props = ReactMapConverter.readableToMap(properties)
 
     EventQueue.add(
       Event(
-        event = event
+        event = event,
+        properties = props
       )
     )
 
@@ -68,6 +79,9 @@ object AnalyticsCore {
   }
 
   fun startSession() {
+     DebugEmitter.emit(
+      "Track => __session_start__"
+    )
 
     EventQueue.add(
       Event(
@@ -77,6 +91,10 @@ object AnalyticsCore {
   }
 
   fun closeSession() {
+
+    DebugEmitter.emit(
+      "Track => __session_end__"
+    )
 
     EventQueue.add(
       Event(

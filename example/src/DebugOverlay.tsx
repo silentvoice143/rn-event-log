@@ -17,6 +17,8 @@ export function DebugOverlay() {
     };
   }, []);
 
+  console.log(logs);
+
   return (
     <View
       style={{

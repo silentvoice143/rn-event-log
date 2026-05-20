@@ -1,7 +1,7 @@
 package com.rneventlog
 
 import android.util.Log
-
+import android.app.Application
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
@@ -9,6 +9,8 @@ import com.facebook.react.bridge.Arguments
 
 import com.rneventlog.core.AnalyticsCore
 import com.rneventlog.core.debug.DebugEmitter
+import com.rneventlog.core.lifecycle.LifecycleTracker
+import com.rneventlog.core.session.SessionManager
 
 class RnEventLogModule(
   reactContext: ReactApplicationContext
@@ -20,6 +22,21 @@ class RnEventLogModule(
   override fun init(config: ReadableMap?) {
 
     DebugEmitter.initialize(this)
+
+    val strategy =
+    config?.getString(
+      "sessionStrategy"
+    )
+
+    SessionManager.configure(
+      strategy
+    )
+
+    val app =
+    reactApplicationContext
+      .applicationContext as Application
+
+    LifecycleTracker.register(app)
 
     AnalyticsCore.init(config)
   }

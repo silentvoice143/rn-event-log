@@ -6,21 +6,11 @@ import { DebugOverlay } from './DebugOverlay';
 
 export default function App() {
   useEffect(() => {
-    Analytics.init();
-
-    Analytics.startSession();
+    Analytics.init({
+      sessionStrategy: 'timeout',
+    });
 
     Analytics.track('button_click');
-
-    Analytics.trackScreen('Home');
-
-    Analytics.trackScreen('Profile');
-
-    Analytics.flush();
-
-    return () => {
-      Analytics.closeSession();
-    };
   }, []);
 
   return (
