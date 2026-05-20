@@ -1,8 +1,9 @@
 import NativeRnEventLog from './NativeRnEventLog';
 import Logger from './utils/logger';
+import type { AnalyticsConfig } from './types/config';
 
 class Analytics {
-  init(config = {}) {
+  init(config: AnalyticsConfig = {}) {
     Logger.log('init called', config);
     NativeRnEventLog.init(config);
   }

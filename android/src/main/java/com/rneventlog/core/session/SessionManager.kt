@@ -10,19 +10,24 @@ object SessionManager {
 
   private var lastBackgroundTime: Long = 0
 
-  private const val SESSION_TIMEOUT =
-    30000L // 30 sec
+  private var sessionTimeout =
+  30000L
 
   private var strategy =
     SessionStrategy.TIMEOUT
 
-  fun configure(
-    sessionStrategy: String?
+   fun configure(
+    sessionStrategy: String?,
+    timeout: Double?
   ) {
 
     strategy =
       sessionStrategy
         ?: SessionStrategy.TIMEOUT
+
+    sessionTimeout =
+      timeout?.toLong()
+        ?: 30000L
   }
 
   fun startOrResume(): Boolean {
@@ -41,7 +46,7 @@ object SessionManager {
       else -> {
 
         sessionId == null ||
-        (now - lastBackgroundTime) > SESSION_TIMEOUT
+        (now - lastBackgroundTime) > sessionTimeout
       }
     }
 
