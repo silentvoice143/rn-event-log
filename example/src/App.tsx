@@ -8,6 +8,8 @@ import { DebugOverlay } from './DebugOverlay';
 export default function App() {
   const [session, setSession] = useState<any>(null);
 
+  const [events, setEvents] = useState<any[]>([]);
+
   useEffect(() => {
     Analytics.init({
       sessionStrategy: 'timeout',
@@ -16,6 +18,14 @@ export default function App() {
     });
 
     Analytics.track('button_click');
+
+    const loadEvents = async () => {
+      const storedEvents = await Analytics.getStoredEvents();
+
+      setEvents(storedEvents);
+    };
+
+    loadEvents();
 
     const interval = setInterval(() => {
       setSession(Analytics.getSession());
@@ -26,7 +36,7 @@ export default function App() {
     };
   }, []);
 
-  console.log(session);
+  console.log(session, events);
 
   return (
     <View style={styles.container}>
@@ -44,6 +54,18 @@ export default function App() {
         <Text style={styles.value}>{session?.duration || 0} ms</Text>
       </View>
 
+      {/* <View style={styles.card}>
+        <Text style={styles.heading}>Stored Events</Text>
+
+        {events.map((item) => (
+          <View key={item.id} style={styles.event}>
+            <Text style={styles.eventName}>{item.event}</Text>
+
+            <Text style={styles.eventProps}>{item.properties}</Text>
+          </View>
+        ))}
+      </View> */}
+
       <DebugOverlay />
     </View>
   );
@@ -51,9 +73,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
   },
 
@@ -81,5 +100,22 @@ const styles = StyleSheet.create({
   value: {
     color: '#00ff88',
     marginBottom: 12,
+  },
+
+  event: {
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    paddingBottom: 10,
+  },
+
+  eventName: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+
+  eventProps: {
+    color: '#00ff88',
+    marginTop: 4,
   },
 });
