@@ -77,22 +77,30 @@ object LifecycleTracker :
   }
 
   override fun onStop(
-    owner: LifecycleOwner
+  owner: LifecycleOwner
+) {
+
+  DebugEmitter.emit(
+    "Process Background"
+  )
+
+  AnalyticsCore.track(
+    "__app_background__",
+    ReactMapConverter.mapToReadable(
+      SessionManager.getSessionData()
+    )
+  )
+
+  if (
+    SessionManager
+      .shouldCloseSessionOnBackground()
   ) {
 
-    DebugEmitter.emit(
-      "Process Background"
-    )
-
-    SessionManager.onBackground()
-
-    AnalyticsCore.track(
-      "__app_background__",
-      ReactMapConverter.mapToReadable(
-        SessionManager.getSessionData()
-      )
-    )
-
-    AnalyticsCore.flush()
+    AnalyticsCore.closeSession()
   }
+
+  SessionManager.onBackground()
+
+  AnalyticsCore.flush()
+}
 }

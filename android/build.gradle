@@ -1,6 +1,7 @@
 buildscript {
   ext.RnEventLog = [
-    kotlinVersion: "2.0.21",
+    kotlinVersion: "2.1.20",
+    kspVersion: "2.1.20-1.0.32",
     minSdkVersion: 24,
     compileSdkVersion: 36,
     targetSdkVersion: 36
@@ -20,15 +21,18 @@ buildscript {
   }
 
   dependencies {
+
     classpath "com.android.tools.build:gradle:8.7.2"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+    classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:${getExtOrDefault('kspVersion')}"
   }
 }
 
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "com.google.devtools.ksp"
 
 apply plugin: "com.facebook.react"
 
@@ -65,4 +69,11 @@ android {
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "androidx.lifecycle:lifecycle-process:2.8.4"
+  implementation "androidx.room:room-runtime:2.6.1"
+  implementation "androidx.room:room-ktx:2.6.1"
+
+  ksp "androidx.room:room-compiler:2.6.1"
+
+  implementation "com.google.code.gson:gson:2.10.1"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
 }

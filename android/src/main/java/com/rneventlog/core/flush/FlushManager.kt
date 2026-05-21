@@ -1,20 +1,126 @@
 package com.rneventlog.core.flush
 
-import com.rneventlog.core.queue.EventQueue
+import android.os.Handler
+import android.os.Looper
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+import com.rneventlog.core.debug.DebugEmitter
+import com.rneventlog.core.storage.StorageManager
 import com.rneventlog.core.transport.Transport
 
 object FlushManager {
 
-  fun flush() {
+  private var flushAt = 20
 
-    val events = EventQueue.getAll()
+  private var flushInterval =
+    30000L
 
-    if (events.isEmpty()) {
-      return
+  private val handler =
+    Handler(
+      Looper.getMainLooper()
+    )
+
+  private val flushRunnable =
+    object : Runnable {
+
+      override fun run() {
+
+        flush()
+
+        handler.postDelayed(
+          this,
+          flushInterval
+        )
+      }
     }
 
-    Transport.send(events)
+  fun configure(
+    flushAtValue: Int?,
+    flushIntervalValue: Double?
+  ) {
 
-    EventQueue.clear()
+    flushAt =
+      flushAtValue ?: 20
+
+    flushInterval =
+      flushIntervalValue?.toLong()
+        ?: 30000L
+  }
+
+  fun start() {
+
+    handler.postDelayed(
+      flushRunnable,
+      flushInterval
+    )
+  }
+
+  fun stop() {
+
+    handler.removeCallbacks(
+      flushRunnable
+    )
+  }
+
+  fun checkAutoFlush(
+    queueSize: Int
+  ) {
+
+    if (queueSize >= flushAt) {
+
+      DebugEmitter.emit(
+        "Auto Flush Triggered"
+      )
+
+      flush()
+    }
+  }
+
+  fun flush() {
+
+    CoroutineScope(
+      Dispatchers.IO
+    ).launch {
+
+      val batch =
+        StorageManager.getBatch(20)
+
+      if (batch.isEmpty()) {
+
+        DebugEmitter.emit(
+          "Flush Skipped => Empty"
+        )
+
+        return@launch
+      }
+
+      DebugEmitter.emit(
+        "Flush Batch => ${batch.size}"
+      )
+
+      val result =
+        Transport.send(batch)
+
+      if (result.success) {
+
+        StorageManager.delete(
+
+          batch.map { it.id }
+        )
+
+        DebugEmitter.emit(
+          "Flush Success"
+        )
+
+      } else {
+
+        DebugEmitter.emit(
+          "Flush Failed"
+        )
+      }
+    }
   }
 }

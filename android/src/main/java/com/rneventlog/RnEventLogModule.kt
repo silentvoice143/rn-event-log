@@ -1,7 +1,5 @@
 package com.rneventlog
 
-import android.util.Log
-
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
@@ -12,6 +10,8 @@ import com.rneventlog.core.debug.DebugEmitter
 import com.rneventlog.core.lifecycle.LifecycleTracker
 import com.rneventlog.core.session.SessionManager
 import com.rneventlog.core.utils.ReactMapConverter
+import com.rneventlog.core.storage.StorageManager
+import com.rneventlog.core.flush.FlushManager
 
 class RnEventLogModule(
   reactContext: ReactApplicationContext
@@ -23,6 +23,10 @@ class RnEventLogModule(
   override fun init(config: ReadableMap?) {
 
     DebugEmitter.initialize(this)
+
+    StorageManager.initialize(
+      reactApplicationContext
+    )
 
       val strategy =
       config?.getString(
@@ -42,10 +46,47 @@ class RnEventLogModule(
         null
       }
 
+      val flushAt =
+  if (
+    config?.hasKey(
+      "flushAt"
+    ) == true
+  ) {
+
+    config.getInt(
+      "flushAt"
+    )
+
+  } else {
+    null
+  }
+
+val flushInterval =
+  if (
+    config?.hasKey(
+      "flushInterval"
+    ) == true
+  ) {
+
+    config.getDouble(
+      "flushInterval"
+    )
+
+  } else {
+    null
+  }
+
     SessionManager.configure(
       strategy,
       sessionTimeout
     )
+
+    FlushManager.configure(
+  flushAt,
+  flushInterval
+)
+
+FlushManager.start()
 
     LifecycleTracker.register()
 

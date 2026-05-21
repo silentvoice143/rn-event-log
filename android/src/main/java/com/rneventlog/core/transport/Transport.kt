@@ -1,11 +1,13 @@
 package com.rneventlog.core.transport
 
 import com.rneventlog.core.debug.DebugEmitter
-import com.rneventlog.core.queue.Event
+import com.rneventlog.core.storage.EventEntity
 
 object Transport {
 
-  fun send(events: List<Event>) {
+  suspend fun send(
+    events: List<EventEntity>
+  ): TransportResult {
 
     DebugEmitter.emit(
       "Sending ${events.size} events"
@@ -21,5 +23,9 @@ object Transport {
         "Properties => ${it.properties}"
       )
     }
+
+    return TransportResult(
+      success = true
+    )
   }
 }

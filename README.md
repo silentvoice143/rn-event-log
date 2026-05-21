@@ -31,3 +31,25 @@ MIT
 ---
 
 Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+
+# Config
+
+```
+Analytics.init({
+
+  // SESSION CONFIG
+
+  sessionStrategy: 'timeout',
+
+  sessionTimeout: 30000,
+
+
+  // FLUSH CONFIG
+
+  flushAt: 20,
+
+  flushInterval: 30000,
+});
+```
+
+---
