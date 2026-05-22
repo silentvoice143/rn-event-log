@@ -25,15 +25,15 @@ object Transport {
     return try {
 
       if (
-  TransportConfig.endpoint.isBlank()
-) {
+       TransportConfig.endpoint.isBlank()
+      ) {
 
-  DebugEmitter.emit(
-    "Transport Skipped => No Endpoint"
-  )
+      DebugEmitter.emit(
+      "Transport Skipped => No Endpoint"
+      )
 
-  return false
-}
+      return true
+      }
 
       val payload =
         mapOf(

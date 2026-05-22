@@ -22,6 +22,7 @@ import com.rneventlog.core.debug.DebugConfig
 import com.rneventlog.core.network.NetworkManager
 import com.rneventlog.core.storage.StorageConfig
 import com.rneventlog.core.user.UserManager
+import com.rneventlog.core.worker.WorkerScheduler
 
 class RnEventLogModule(
   reactContext: ReactApplicationContext
@@ -127,7 +128,9 @@ val flushInterval =
 )
 
     FlushManager.start()
-
+WorkerScheduler.start(
+  reactApplicationContext
+)
    
 
   val debug =
