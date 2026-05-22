@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.rneventlog.core.queue.Event
 import com.rneventlog.core.debug.DebugEmitter
+import com.rneventlog.core.storage.StorageConfig
 
 object StorageManager {
 
@@ -41,6 +42,8 @@ object StorageManager {
           System.currentTimeMillis()
       )
     )
+
+    enforceLimit()
   }
 
   suspend fun getBatch(
@@ -67,4 +70,26 @@ object StorageManager {
     db.eventDao()
       .deleteByIds(ids)
   }
+
+  private suspend fun enforceLimit() {
+
+  val total =
+    db.eventDao().count()
+
+  val overflow =
+    total -
+      StorageConfig.maxStoredEvents
+
+  if (overflow > 0) {
+
+    db.eventDao()
+      .deleteOldest(
+        overflow
+      )
+
+    DebugEmitter.emit(
+      "Queue Pruned => $overflow"
+    )
+  }
+}
 }

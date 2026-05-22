@@ -46,6 +46,14 @@ class Analytics {
   onDebug(callback: (event: { message: string }) => void) {
     return NativeRnEventLog.onDebug(callback);
   }
+
+  getStoredEvents() {
+    return NativeRnEventLog.getStoredEvents();
+  }
+
+  setGlobalProperties(properties = {}) {
+    NativeRnEventLog.setGlobalProperties(properties);
+  }
 }
 
 export default new Analytics();

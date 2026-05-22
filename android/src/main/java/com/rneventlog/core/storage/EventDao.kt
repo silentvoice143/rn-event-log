@@ -36,4 +36,23 @@ interface EventDao {
   suspend fun getBatch(
   limit: Int
   ): List<EventEntity>
+
+  @Query(
+  "SELECT COUNT(*) FROM events"
+  )
+  suspend fun count(): Int
+
+  @Query(
+  """
+  DELETE FROM events
+  WHERE id IN (
+    SELECT id FROM events
+    ORDER BY id ASC
+    LIMIT :count
+  )
+  """
+)
+suspend fun deleteOldest(
+  count: Int
+)
 }

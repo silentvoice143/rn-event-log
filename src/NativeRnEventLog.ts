@@ -27,6 +27,10 @@ export interface Spec extends TurboModule {
 
   closeSession(): void;
 
+  getStoredEvents(): Promise<Array<Object>>;
+
+  setGlobalProperties(properties: Object): void;
+
   // onAppStateChange(state: string): void;
   // Required for NativeEventEmitter
   // addListener(eventName: string): void;

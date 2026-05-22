@@ -11,6 +11,9 @@ object DebugEmitter {
     }
 
     fun emit(message: String) {
+        if (!DebugConfig.enabled) {
+  return
+}
         module?.emitDebug(message)
     }
 }

@@ -15,6 +15,7 @@ export default function App() {
       sessionStrategy: 'timeout',
       sessionTimeout: 30000,
       autoTrackScreens: true,
+      debug: true,
     });
 
     Analytics.track('button_click');
@@ -73,6 +74,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
+    height: '100%',
     padding: 20,
   },
 

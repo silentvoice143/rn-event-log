@@ -13,6 +13,9 @@ import com.rneventlog.core.queue.EventQueue
 import com.rneventlog.core.utils.ReactMapConverter
 import com.rneventlog.core.debug.DebugEmitter
 import com.rneventlog.core.storage.StorageManager
+import com.rneventlog.core.metadata.MetadataProvider
+import com.rneventlog.core.config.GlobalProperties
+import com.rneventlog.core.user.UserManager
 
 object AnalyticsCore {
 
@@ -56,10 +59,23 @@ object AnalyticsCore {
 
  
 
-  val props =
-    ReactMapConverter.readableToMap(
-      properties
-    )
+  val eventProps =
+  ReactMapConverter.readableToMap(
+    properties
+  )
+
+val props =
+  MetadataProvider
+    .get()
+    .toMutableMap()
+
+props.putAll(
+  GlobalProperties.get()
+)
+
+props.putAll(
+  eventProps
+)
 
   trackInternal(
 
@@ -88,13 +104,26 @@ object AnalyticsCore {
   }
 
   fun identify(
-    userId: String,
-    traits: ReadableMap?
-  ) {
-    DebugLogger.log(
-      "Identify => $userId"
-    )
-  }
+  userId: String,
+  traits: ReadableMap?
+) {
+
+  val mappedTraits =
+
+    ReactMapConverter
+      .readableToMap(
+        traits
+      )
+
+  UserManager.identify(
+    userId,
+    mappedTraits
+  )
+
+  DebugEmitter.emit(
+    "Identify => $userId"
+  )
+}
 
   fun startSession() {
     

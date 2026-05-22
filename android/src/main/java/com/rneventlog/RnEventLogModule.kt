@@ -12,6 +12,16 @@ import com.rneventlog.core.session.SessionManager
 import com.rneventlog.core.utils.ReactMapConverter
 import com.rneventlog.core.storage.StorageManager
 import com.rneventlog.core.flush.FlushManager
+import com.rneventlog.core.transport.TransportConfig
+import com.facebook.react.bridge.Promise
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import com.rneventlog.core.config.GlobalProperties
+import com.rneventlog.core.debug.DebugConfig
+import com.rneventlog.core.network.NetworkManager
+import com.rneventlog.core.storage.StorageConfig
+import com.rneventlog.core.user.UserManager
 
 class RnEventLogModule(
   reactContext: ReactApplicationContext
@@ -20,13 +30,43 @@ class RnEventLogModule(
   //override fun addListener(eventName: String) {}
   //override fun removeListeners(count: Double) {}
 
+  
+
   override fun init(config: ReadableMap?) {
 
     DebugEmitter.initialize(this)
+  UserManager.initialize(
+  reactApplicationContext
+  )
+  NetworkManager.initialize(
+  reactApplicationContext)
 
+  val maxStoredEvents =
+  if (
+    config?.hasKey(
+      "maxStoredEvents"
+    ) == true
+  ) {
+
+    config.getInt(
+      "maxStoredEvents"
+    )
+
+  } else {
+    null
+  }
+
+
+maxStoredEvents?.let {
+
+  StorageConfig.maxStoredEvents =
+    it
+}
     StorageManager.initialize(
       reactApplicationContext
     )
+
+    
 
       val strategy =
       config?.getString(
@@ -86,12 +126,145 @@ val flushInterval =
   flushInterval
 )
 
-FlushManager.start()
+    FlushManager.start()
+
+   
+
+  val debug =
+  if (
+    config?.hasKey(
+      "debug"
+    ) == true
+  ) {
+
+    config.getBoolean(
+      "debug"
+    )
+
+  } else {
+
+    false
+  }
+
+DebugConfig.enabled =
+  debug
+
+    val endpoint =
+  config?.getString(
+    "endpoint"
+  )
+
+val apiKey =
+  config?.getString(
+    "apiKey"
+  )
+
+val headers =
+  if (
+    config?.hasKey(
+      "headers"
+    ) == true
+  ) {
+
+    ReactMapConverter
+      .readableToMap(
+        config.getMap(
+          "headers"
+        )
+      )
+
+  } else {
+    emptyMap()
+  }
+
+if (endpoint != null) {
+  TransportConfig.endpoint =
+    endpoint
+}
+
+TransportConfig.apiKey =
+  apiKey
+
+  TransportConfig.headers =
+  headers.mapValues {
+    it.value.toString()
+  }
+
+
 
     LifecycleTracker.register()
 
     AnalyticsCore.init(config)
   }
+
+  override fun getStoredEvents(
+  promise: Promise
+) {
+
+  CoroutineScope(
+    Dispatchers.IO
+  ).launch {
+
+    try {
+
+      val events =
+        StorageManager.getAll()
+
+      val array =
+        Arguments.createArray()
+
+      events.forEach {
+
+        val map =
+          Arguments.createMap()
+
+        map.putDouble(
+          "id",
+          it.id.toDouble()
+        )
+
+        map.putString(
+          "event",
+          it.event
+        )
+
+        map.putString(
+          "properties",
+          it.properties
+        )
+
+        map.putDouble(
+          "timestamp",
+          it.timestamp.toDouble()
+        )
+
+        array.pushMap(map)
+      }
+
+      promise.resolve(array)
+
+    } catch (e: Exception) {
+
+      promise.reject(
+        "GET_EVENTS_ERROR",
+        e
+      )
+    }
+  }
+}
+
+override fun setGlobalProperties(
+  properties: ReadableMap
+) {
+
+  GlobalProperties.set(
+
+    ReactMapConverter
+      .readableToMap(
+        properties
+      )
+  )
+}
 
   override fun track(
     event: String,
