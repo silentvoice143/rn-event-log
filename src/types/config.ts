@@ -49,10 +49,6 @@ export interface AnalyticsConfig {
 
   retryDelay?: number;
 
-  // NETWORK
-
-  networkAware?: boolean;
-
   // SCREENS
 
   autoTrackScreens?: boolean;

@@ -122,9 +122,79 @@ val flushInterval =
       sessionTimeout
     )
 
+  val retryEnabled =
+  if (
+    config?.hasKey(
+      "retryEnabled"
+    ) == true
+  ) {
+
+    config.getBoolean(
+      "retryEnabled"
+    )
+
+  } else {
+    null
+  }
+
+val maxRetries =
+  if (
+    config?.hasKey(
+      "maxRetries"
+    ) == true
+  ) {
+
+    config.getInt(
+      "maxRetries"
+    )
+
+  } else {
+    null
+  }
+
+val retryDelay =
+  if (
+    config?.hasKey(
+      "retryDelay"
+    ) == true
+  ) {
+
+    config.getDouble(
+      "retryDelay"
+    )
+
+  } else {
+    null
+  }
+
+  val batchSize =
+  if (
+    config?.hasKey(
+      "batchSize"
+    ) == true
+  ) {
+
+    config.getInt(
+      "batchSize"
+    )
+
+  } else {
+    null
+  }
+
     FlushManager.configure(
+
   flushAt,
-  flushInterval
+
+  flushInterval,
+
+  retryEnabled,
+
+  maxRetries,
+
+  retryDelay,
+
+  batchSize
 )
 
     FlushManager.start()
