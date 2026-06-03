@@ -26,7 +26,22 @@ export default function App() {
 
       autoTrackScreens: true,
 
+      // API
+
+      endpoint: 'https://dummy-api.example.com/analytics',
+
+      apiKey: 'test-api-key-123',
+
       debug: true,
+
+      metadata: {
+        osVersion: true,
+        platform: true,
+      },
+
+      allowCellular: true, // if false then mobile network cant flush events
+
+      allowMetered: true, // to allow metered connection or disable it
     });
   }, []);
 

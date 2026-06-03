@@ -46,6 +46,16 @@ Built using:
 
 ✅ TypeScript support
 
+✅ Network Awareness
+
+- real-time connectivity listeners
+- automatic flush on reconnect
+- metered network awareness
+- WiFi/mobile data handling
+- airplane mode detection
+
+---
+
 ---
 
 # Installation
@@ -561,20 +571,6 @@ Example:
 3rd retry → 30s
 4th retry → 60s
 ```
-
----
-
-## Network Awareness Improvements
-
-Current implementation supports basic connectivity detection.
-
-Planned improvements:
-
-- real-time connectivity listeners
-- automatic flush on reconnect
-- metered network awareness
-- WiFi/mobile data handling
-- airplane mode detection
 
 ---
 

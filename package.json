@@ -1,6 +1,6 @@
 {
   "name": "rn-event-log",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.1",
   "description": "event log",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "example": "yarn workspace rn-event-log-example",
+    "example:run": "yarn workspace rn-event-log-example android",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "typecheck": "tsc",

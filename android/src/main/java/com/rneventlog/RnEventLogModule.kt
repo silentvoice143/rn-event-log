@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import com.rneventlog.core.config.GlobalProperties
 import com.rneventlog.core.debug.DebugConfig
 import com.rneventlog.core.network.NetworkManager
+import com.rneventlog.core.network.NetworkConfig
 import com.rneventlog.core.storage.StorageConfig
 import com.rneventlog.core.user.UserManager
 import com.rneventlog.core.worker.WorkerScheduler
@@ -31,50 +32,88 @@ class RnEventLogModule(
   //override fun addListener(eventName: String) {}
   //override fun removeListeners(count: Double) {}
 
-  
 
   override fun init(config: ReadableMap?) {
 
     DebugEmitter.initialize(this)
-  UserManager.initialize(
-  reactApplicationContext
-  )
-  NetworkManager.initialize(
-  reactApplicationContext)
+    val allowCellular =
 
-  val maxStoredEvents =
-  if (
-    config?.hasKey(
-      "maxStoredEvents"
-    ) == true
-  ) {
+      if (
+        config?.hasKey(
+          "allowCellular"
+        ) == true
+      ) {
 
-    config.getInt(
-      "maxStoredEvents"
+        config.getBoolean(
+          "allowCellular"
+        )
+
+      } else {
+
+        true
+      }
+
+    val allowMetered =
+
+      if (
+        config?.hasKey(
+          "allowMetered"
+        ) == true
+      ) {
+
+        config.getBoolean(
+          "allowMetered"
+        )
+
+      } else {
+
+        true
+      }
+
+    NetworkConfig.allowCellular =
+      allowCellular
+
+    NetworkConfig.allowMetered =
+      allowMetered
+    UserManager.initialize(
+      reactApplicationContext
+    )
+    NetworkManager.initialize(
+      reactApplicationContext
     )
 
-  } else {
-    null
-  }
+    val maxStoredEvents =
+      if (
+        config?.hasKey(
+          "maxStoredEvents"
+        ) == true
+      ) {
+
+        config.getInt(
+          "maxStoredEvents"
+        )
+
+      } else {
+        null
+      }
 
 
-maxStoredEvents?.let {
+    maxStoredEvents?.let {
 
-  StorageConfig.maxStoredEvents =
-    it
-}
+      StorageConfig.maxStoredEvents =
+        it
+    }
     StorageManager.initialize(
       reactApplicationContext
     )
 
-    
 
-      val strategy =
+    val strategy =
       config?.getString(
         "sessionStrategy"
       )
 
-      val sessionTimeout =
+    val sessionTimeout =
       if (
         config?.hasKey(
           "sessionTimeout"
@@ -87,181 +126,181 @@ maxStoredEvents?.let {
         null
       }
 
-      val flushAt =
-  if (
-    config?.hasKey(
-      "flushAt"
-    ) == true
-  ) {
+    val flushAt =
+      if (
+        config?.hasKey(
+          "flushAt"
+        ) == true
+      ) {
 
-    config.getInt(
-      "flushAt"
-    )
+        config.getInt(
+          "flushAt"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
-val flushInterval =
-  if (
-    config?.hasKey(
-      "flushInterval"
-    ) == true
-  ) {
+    val flushInterval =
+      if (
+        config?.hasKey(
+          "flushInterval"
+        ) == true
+      ) {
 
-    config.getDouble(
-      "flushInterval"
-    )
+        config.getDouble(
+          "flushInterval"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
     SessionManager.configure(
       strategy,
       sessionTimeout
     )
 
-  val retryEnabled =
-  if (
-    config?.hasKey(
-      "retryEnabled"
-    ) == true
-  ) {
+    val retryEnabled =
+      if (
+        config?.hasKey(
+          "retryEnabled"
+        ) == true
+      ) {
 
-    config.getBoolean(
-      "retryEnabled"
-    )
+        config.getBoolean(
+          "retryEnabled"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
-val maxRetries =
-  if (
-    config?.hasKey(
-      "maxRetries"
-    ) == true
-  ) {
+    val maxRetries =
+      if (
+        config?.hasKey(
+          "maxRetries"
+        ) == true
+      ) {
 
-    config.getInt(
-      "maxRetries"
-    )
+        config.getInt(
+          "maxRetries"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
-val retryDelay =
-  if (
-    config?.hasKey(
-      "retryDelay"
-    ) == true
-  ) {
+    val retryDelay =
+      if (
+        config?.hasKey(
+          "retryDelay"
+        ) == true
+      ) {
 
-    config.getDouble(
-      "retryDelay"
-    )
+        config.getDouble(
+          "retryDelay"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
-  val batchSize =
-  if (
-    config?.hasKey(
-      "batchSize"
-    ) == true
-  ) {
+    val batchSize =
+      if (
+        config?.hasKey(
+          "batchSize"
+        ) == true
+      ) {
 
-    config.getInt(
-      "batchSize"
-    )
+        config.getInt(
+          "batchSize"
+        )
 
-  } else {
-    null
-  }
+      } else {
+        null
+      }
 
     FlushManager.configure(
 
-  flushAt,
+      flushAt,
 
-  flushInterval,
+      flushInterval,
 
-  retryEnabled,
+      retryEnabled,
 
-  maxRetries,
+      maxRetries,
 
-  retryDelay,
+      retryDelay,
 
-  batchSize
-)
-
-    FlushManager.start()
-WorkerScheduler.start(
-  reactApplicationContext
-)
-   
-
-  val debug =
-  if (
-    config?.hasKey(
-      "debug"
-    ) == true
-  ) {
-
-    config.getBoolean(
-      "debug"
+      batchSize
     )
 
-  } else {
+    FlushManager.start()
+    WorkerScheduler.start(
+      reactApplicationContext
+    )
 
-    false
-  }
 
-DebugConfig.enabled =
-  debug
+    val debug =
+      if (
+        config?.hasKey(
+          "debug"
+        ) == true
+      ) {
+
+        config.getBoolean(
+          "debug"
+        )
+
+      } else {
+
+        false
+      }
+
+    DebugConfig.enabled =
+      debug
 
     val endpoint =
-  config?.getString(
-    "endpoint"
-  )
-
-val apiKey =
-  config?.getString(
-    "apiKey"
-  )
-
-val headers =
-  if (
-    config?.hasKey(
-      "headers"
-    ) == true
-  ) {
-
-    ReactMapConverter
-      .readableToMap(
-        config.getMap(
-          "headers"
-        )
+      config?.getString(
+        "endpoint"
       )
 
-  } else {
-    emptyMap()
-  }
+    val apiKey =
+      config?.getString(
+        "apiKey"
+      )
 
-if (endpoint != null) {
-  TransportConfig.endpoint =
-    endpoint
-}
+    val headers =
+      if (
+        config?.hasKey(
+          "headers"
+        ) == true
+      ) {
 
-TransportConfig.apiKey =
-  apiKey
+        ReactMapConverter
+          .readableToMap(
+            config.getMap(
+              "headers"
+            )
+          )
 
-  TransportConfig.headers =
-  headers.mapValues {
-    it.value.toString()
-  }
+      } else {
+        emptyMap()
+      }
+
+    if (endpoint != null) {
+      TransportConfig.endpoint =
+        endpoint
+    }
+
+    TransportConfig.apiKey =
+      apiKey
+
+    TransportConfig.headers =
+      headers.mapValues {
+        it.value.toString()
+      }
 
 
 
@@ -271,73 +310,73 @@ TransportConfig.apiKey =
   }
 
   override fun getStoredEvents(
-  promise: Promise
-) {
+    promise: Promise
+  ) {
 
-  CoroutineScope(
-    Dispatchers.IO
-  ).launch {
+    CoroutineScope(
+      Dispatchers.IO
+    ).launch {
 
-    try {
+      try {
 
-      val events =
-        StorageManager.getAll()
+        val events =
+          StorageManager.getAll()
 
-      val array =
-        Arguments.createArray()
+        val array =
+          Arguments.createArray()
 
-      events.forEach {
+        events.forEach {
 
-        val map =
-          Arguments.createMap()
+          val map =
+            Arguments.createMap()
 
-        map.putDouble(
-          "id",
-          it.id.toDouble()
+          map.putDouble(
+            "id",
+            it.id.toDouble()
+          )
+
+          map.putString(
+            "event",
+            it.event
+          )
+
+          map.putString(
+            "properties",
+            it.properties
+          )
+
+          map.putDouble(
+            "timestamp",
+            it.timestamp.toDouble()
+          )
+
+          array.pushMap(map)
+        }
+
+        promise.resolve(array)
+
+      } catch (e: Exception) {
+
+        promise.reject(
+          "GET_EVENTS_ERROR",
+          e
         )
-
-        map.putString(
-          "event",
-          it.event
-        )
-
-        map.putString(
-          "properties",
-          it.properties
-        )
-
-        map.putDouble(
-          "timestamp",
-          it.timestamp.toDouble()
-        )
-
-        array.pushMap(map)
       }
-
-      promise.resolve(array)
-
-    } catch (e: Exception) {
-
-      promise.reject(
-        "GET_EVENTS_ERROR",
-        e
-      )
     }
   }
-}
 
-override fun setGlobalProperties(
-  properties: ReadableMap
-) {
+  override fun setGlobalProperties(
+    properties: ReadableMap
+  ) {
 
-  GlobalProperties.set(
+    GlobalProperties.set(
 
-    ReactMapConverter
-      .readableToMap(
-        properties
-      )
-  )
-}
+      ReactMapConverter
+        .readableToMap(
+          properties
+        )
+    )
+  }
 
   override fun track(
     event: String,
@@ -391,9 +430,9 @@ override fun setGlobalProperties(
   fun emitDebug(message: String) {
 
     emitOnDebug(
-        Arguments.createMap().apply {
-            putString("message", message)
-        }
+      Arguments.createMap().apply {
+        putString("message", message)
+      }
     )
   }
 
