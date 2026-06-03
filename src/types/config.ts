@@ -66,4 +66,10 @@ export interface AnalyticsConfig {
   // METADATA
 
   metadata?: MetadataConfig;
+
+  // NETWORK
+
+  allowCellular?: boolean; // for allowing cellular network
+
+  allowMetered?: boolean; // for network which has limit
 }

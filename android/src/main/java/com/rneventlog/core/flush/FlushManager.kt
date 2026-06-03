@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 
 import com.rneventlog.core.debug.DebugEmitter
 import com.rneventlog.core.network.NetworkManager
+import com.rneventlog.core.network.NetworkConfig
+import com.rneventlog.core.network.NetworkType
 import com.rneventlog.core.storage.StorageManager
 import com.rneventlog.core.transport.Transport
 
@@ -162,6 +164,37 @@ object FlushManager {
 
       return
     }
+
+    if (
+
+  !NetworkConfig.allowCellular &&
+
+  NetworkManager.getNetworkType() ==
+    NetworkType.CELLULAR
+
+) {
+
+  DebugEmitter.emit(
+    "Flush Skipped => Cellular Disabled"
+  )
+
+  return
+}
+
+if (
+
+  !NetworkConfig.allowMetered &&
+
+  NetworkManager.isMetered()
+
+) {
+
+  DebugEmitter.emit(
+    "Flush Skipped => Metered Network"
+  )
+
+  return
+}
 
     val now =
       System.currentTimeMillis()
