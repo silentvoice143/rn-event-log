@@ -1,30 +1,54 @@
 import { useEffect } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
 
-import Analytics from 'rn-event-log';
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
+
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import Analytics, { trackNavigation } from 'rn-event-log';
+
 import { DebugOverlay } from './DebugOverlay';
+import Home from './Home';
+import Profile from './Profile';
+
+const Stack = createNativeStackNavigator();
+
+const navigationRef = createNavigationContainerRef();
 
 export default function App() {
   useEffect(() => {
     Analytics.init({
       sessionStrategy: 'timeout',
-    });
 
-    Analytics.track('button_click');
+      sessionTimeout: 30000,
+
+      autoTrackScreens: true,
+
+      debug: true,
+    });
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text>RN Event Log Working 🚀</Text>
+    <>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => {
+          trackNavigation(navigationRef);
+        }}
+        onStateChange={() => {
+          trackNavigation(navigationRef);
+        }}
+      >
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={Home} />
+
+          <Stack.Screen name="Profile" component={Profile} />
+        </Stack.Navigator>
+      </NavigationContainer>
+
       <DebugOverlay />
-    </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

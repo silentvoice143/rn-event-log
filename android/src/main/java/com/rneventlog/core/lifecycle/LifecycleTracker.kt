@@ -1,8 +1,11 @@
 package com.rneventlog.core.lifecycle
 
-import android.app.Activity
-import android.app.Application
-import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 
 import com.rneventlog.core.AnalyticsCore
 import com.rneventlog.core.debug.DebugEmitter
@@ -10,185 +13,94 @@ import com.rneventlog.core.session.SessionManager
 import com.rneventlog.core.utils.ReactMapConverter
 
 object LifecycleTracker :
-  Application.ActivityLifecycleCallbacks {
+  DefaultLifecycleObserver {
 
-  private var started = 0
+  private var isRegistered = false
 
-  fun register(
-  application: Application
-) {
+  fun register() {
 
-  DebugEmitter.emit(
-    "LifecycleTracker Registered"
-  )
+    if (isRegistered) {
+      return
+    }
 
-  application
-    .registerActivityLifecycleCallbacks(
-      this
-    )
+    isRegistered = true
 
-  started = 1
-
-  DebugEmitter.emit(
-    "Initial Foreground Bootstrap"
-  )
-
-  val isNewSession =
-    SessionManager.startOrResume()
-
-  if (isNewSession) {
-
-    DebugEmitter.emit(
-      "Track => __app_open__"
-    )
-
-    AnalyticsCore.track(
-      "__app_open__",
-      null
-    )
-
-    DebugEmitter.emit(
-      "Track => __session_start__"
-    )
-
-    AnalyticsCore.track(
-      "__session_start__",
-      ReactMapConverter.mapToReadable(
-        SessionManager.getSessionData()
-      )
-    )
-  }
-
-  DebugEmitter.emit(
-    "Track => __app_foreground__"
-  )
-
-  AnalyticsCore.track(
-    "__app_foreground__",
-    null
-  )
-}
-
-  override fun onActivityStarted(
-    activity: Activity
-  ) {
-
-    started++
-
-    DebugEmitter.emit(
-      "Activity Started => ${activity.localClassName}"
-    )
-
-    DebugEmitter.emit(
-      "Started Count => $started"
-    )
-
-    if (started == 1) {
+    Handler(
+      Looper.getMainLooper()
+    ).post {
 
       DebugEmitter.emit(
-        "App Entered Foreground"
+        "LifecycleTracker Registered"
       )
 
-      val isNewSession =
-        SessionManager.startOrResume()
-
-      DebugEmitter.emit(
-        "Is New Session => $isNewSession"
-      )
-
-      if (isNewSession) {
-
-        DebugEmitter.emit(
-          "Track => __session_start__"
-        )
-
-        DebugEmitter.emit(
-          "Session => ${SessionManager.getSessionData()}"
-        )
-
-        AnalyticsCore.track(
-          "__session_start__",
-          ReactMapConverter.mapToReadable(
-            SessionManager.getSessionData()
-          )
-        )
-      }
-
-      DebugEmitter.emit(
-        "Track => __app_foreground__"
-      )
-
-      AnalyticsCore.track(
-        "__app_foreground__",
-        null
-      )
+      ProcessLifecycleOwner
+        .get()
+        .lifecycle
+        .addObserver(this)
     }
   }
 
-  override fun onActivityStopped(
-    activity: Activity
+  override fun onStart(
+    owner: LifecycleOwner
   ) {
 
-    started--
-
     DebugEmitter.emit(
-      "Activity Stopped => ${activity.localClassName}"
+      "Process Foreground"
     )
 
+    val isNewSession =
+      SessionManager.startOrResume()
+
     DebugEmitter.emit(
-      "Started Count => $started"
+      "Is New Session => $isNewSession"
     )
 
-    if (started == 0) {
+    if (isNewSession) {
 
-      DebugEmitter.emit(
-        "App Entered Background"
-      )
-
-      SessionManager.onBackground()
-
-      DebugEmitter.emit(
-        "Track => __app_background__"
-      )
-
-      DebugEmitter.emit(
-        "Session => ${SessionManager.getSessionData()}"
+      AnalyticsCore.track(
+        "__app_open__",
+        null
       )
 
       AnalyticsCore.track(
-        "__app_background__",
+        "__session_start__",
         ReactMapConverter.mapToReadable(
           SessionManager.getSessionData()
         )
       )
-
-      DebugEmitter.emit(
-        "Flush Triggered"
-      )
-
-      AnalyticsCore.flush()
     }
+
+    AnalyticsCore.track(
+      "__app_foreground__",
+      null
+    )
   }
 
-  override fun onActivityCreated(
-    activity: Activity,
-    savedInstanceState: Bundle?
-  ) {}
+  override fun onStop(
+  owner: LifecycleOwner
+) {
 
-  override fun onActivityResumed(
-    activity: Activity
-  ) {}
+  DebugEmitter.emit(
+    "Process Background"
+  )
 
-  override fun onActivityPaused(
-    activity: Activity
-  ) {}
+  AnalyticsCore.track(
+    "__app_background__",
+    ReactMapConverter.mapToReadable(
+      SessionManager.getSessionData()
+    )
+  )
 
-  override fun onActivitySaveInstanceState(
-    activity: Activity,
-    outState: Bundle
-  ) {}
+  if (
+    SessionManager
+      .shouldCloseSessionOnBackground()
+  ) {
 
-  override fun onActivityDestroyed(
-    activity: Activity
-  ) {}
+    AnalyticsCore.closeSession()
+  }
+
+  SessionManager.onBackground()
+
+  AnalyticsCore.flush()
+}
 }

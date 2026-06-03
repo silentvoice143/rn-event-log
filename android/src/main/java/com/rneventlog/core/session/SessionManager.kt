@@ -10,19 +10,23 @@ object SessionManager {
 
   private var lastBackgroundTime: Long = 0
 
-  private const val SESSION_TIMEOUT =
-    30000L // 30 sec
+  private var sessionTimeout = 30000L
 
   private var strategy =
     SessionStrategy.TIMEOUT
 
   fun configure(
-    sessionStrategy: String?
+    sessionStrategy: String?,
+    timeout: Double?
   ) {
 
     strategy =
       sessionStrategy
         ?: SessionStrategy.TIMEOUT
+
+    sessionTimeout =
+      timeout?.toLong()
+        ?: 30000L
   }
 
   fun startOrResume(): Boolean {
@@ -30,20 +34,22 @@ object SessionManager {
     val now =
       System.currentTimeMillis()
 
-    val shouldCreateNewSession = when (strategy) {
-
-      SessionStrategy.APP_STATE -> {
+    val shouldCreateNewSession =
+      if (
+        strategy ==
+        SessionStrategy.APP_STATE
+      ) {
 
         sessionId == null ||
         lastBackgroundTime > 0
-      }
 
-      else -> {
+      } else {
 
         sessionId == null ||
-        (now - lastBackgroundTime) > SESSION_TIMEOUT
+
+        (now - lastBackgroundTime) >
+        sessionTimeout
       }
-    }
 
     if (shouldCreateNewSession) {
 
@@ -61,13 +67,18 @@ object SessionManager {
     return false
   }
 
+  fun shouldCloseSessionOnBackground(): Boolean {
+    return strategy == SessionStrategy.APP_STATE
+  }
+
   fun onBackground() {
 
     lastBackgroundTime =
       System.currentTimeMillis()
   }
 
-  fun getSessionData(): Map<String, Any?> {
+  fun getSessionData():
+    Map<String, Any?> {
 
     val now =
       System.currentTimeMillis()
@@ -76,11 +87,15 @@ object SessionManager {
       "sessionId" to sessionId,
       "startTime" to startTime,
       "currentTime" to now,
-      "duration" to (now - startTime)
+      "duration" to (
+        now - startTime
+      )
     )
   }
 
-  fun getSessionId(): String? {
+  fun getSessionId():
+    String? {
+
     return sessionId
   }
 

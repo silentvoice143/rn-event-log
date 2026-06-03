@@ -1,28 +1,41 @@
 package com.rneventlog.core.navigation
 
+import com.rneventlog.core.AnalyticsCore
 import com.rneventlog.core.queue.Event
-import com.rneventlog.core.queue.EventQueue
 
 object ScreenTracker {
 
-  private var currentScreen: String? = null
-  private var startTime: Long = 0
+  private var currentScreen:
+    String? = null
 
-  fun track(screen: String) {
+  private var startTime:
+    Long = 0
 
-    val now = System.currentTimeMillis()
+  fun track(
+    screen: String
+  ) {
+
+    val now =
+      System.currentTimeMillis()
 
     currentScreen?.let {
 
-      val duration = now - startTime
+      val duration =
+        now - startTime
 
-      EventQueue.add(
+      AnalyticsCore.trackInternal(
+
         Event(
           event = "__screen_time__",
+
           properties = mapOf(
+
             "screen" to it,
+
             "startTime" to startTime,
+
             "endTime" to now,
+
             "duration" to duration
           )
         )
@@ -30,6 +43,7 @@ object ScreenTracker {
     }
 
     currentScreen = screen
+
     startTime = now
   }
 }

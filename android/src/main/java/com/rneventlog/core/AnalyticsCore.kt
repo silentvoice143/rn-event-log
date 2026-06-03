@@ -2,6 +2,9 @@ package com.rneventlog.core
 
 import com.facebook.react.bridge.ReadableMap
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.rneventlog.core.debug.DebugLogger
 import com.rneventlog.core.flush.FlushManager
 import com.rneventlog.core.navigation.ScreenTracker
@@ -9,6 +12,10 @@ import com.rneventlog.core.queue.Event
 import com.rneventlog.core.queue.EventQueue
 import com.rneventlog.core.utils.ReactMapConverter
 import com.rneventlog.core.debug.DebugEmitter
+import com.rneventlog.core.storage.StorageManager
+import com.rneventlog.core.metadata.MetadataProvider
+import com.rneventlog.core.config.GlobalProperties
+import com.rneventlog.core.user.UserManager
 
 object AnalyticsCore {
 
@@ -19,43 +26,70 @@ object AnalyticsCore {
     )
   }
 
-  fun track(
-    event: String,
-    properties: ReadableMap?
-  ) {
-     DebugEmitter.emit(
-      "Track => $event"
+  fun trackInternal(
+  trackedEvent: Event
+) {
+
+  DebugEmitter.emit(
+    "Queue => ${trackedEvent.event}"
+  )
+
+  EventQueue.add(
+    trackedEvent
+  )
+
+  CoroutineScope(
+    Dispatchers.IO
+  ).launch {
+
+    StorageManager.save(
+      trackedEvent
     )
 
-    DebugEmitter.emit(
-      "Properties => ${properties?.toHashMap()}"
-    )
-
-    DebugLogger.log(
-    "Native Track => $event"
-   )
-   val props = ReactMapConverter.readableToMap(properties)
-
-    EventQueue.add(
-      Event(
-        event = event,
-        properties = props
-      )
-    )
-
-    DebugLogger.log(
-      "Queue Size => ${EventQueue.size()}"
+    FlushManager.checkAutoFlush(
+      EventQueue.size()
     )
   }
+}
+
+  fun track(
+  event: String,
+  properties: ReadableMap?
+) {
+
+ 
+
+  val eventProps =
+  ReactMapConverter.readableToMap(
+    properties
+  )
+
+val props =
+  MetadataProvider
+    .get()
+    .toMutableMap()
+
+props.putAll(
+  GlobalProperties.get()
+)
+
+props.putAll(
+  eventProps
+)
+
+  trackInternal(
+
+    Event(
+      event = event,
+      properties = props
+    )
+  )
+}
 
   fun trackScreen(
     screen: String,
     properties: ReadableMap?
   ) {
-
-    DebugLogger.log(
-      "Screen => $screen"
-    )
 
     ScreenTracker.track(screen)
   }
@@ -70,36 +104,46 @@ object AnalyticsCore {
   }
 
   fun identify(
-    userId: String,
-    traits: ReadableMap?
-  ) {
-    DebugLogger.log(
-      "Identify => $userId"
-    )
-  }
+  userId: String,
+  traits: ReadableMap?
+) {
+
+  val mappedTraits =
+
+    ReactMapConverter
+      .readableToMap(
+        traits
+      )
+
+  UserManager.identify(
+    userId,
+    mappedTraits
+  )
+
+  DebugEmitter.emit(
+    "Identify => $userId"
+  )
+}
 
   fun startSession() {
-     DebugEmitter.emit(
-      "Track => __session_start__"
-    )
+    
 
-    EventQueue.add(
-      Event(
-        event = "__session_start__"
-      )
-    )
+    trackInternal(
+
+  Event(
+    event = "__session_start__"
+  )
+)
   }
 
   fun closeSession() {
 
-    DebugEmitter.emit(
-      "Track => __session_end__"
-    )
 
-    EventQueue.add(
-      Event(
-        event = "__session_end__"
-      )
-    )
+    trackInternal(
+
+  Event(
+    event = "__session_end__"
+  )
+)
   }
 }
