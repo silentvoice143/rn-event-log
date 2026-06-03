@@ -12,6 +12,7 @@ object MetadataProvider {
     Map<String, Any?> {
 
     return mapOf(
+
       "userId" to UserManager.getUserId(),
 
       "userTraits" to UserManager.getTraits(),
