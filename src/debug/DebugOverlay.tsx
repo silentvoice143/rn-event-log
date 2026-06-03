@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 
 import { subscribeDebug } from './DebugStore';
 
@@ -14,27 +14,10 @@ export function DebugOverlay() {
   }, []);
 
   return (
-    <View
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 250,
-        backgroundColor: 'black',
-        padding: 10,
-      }}
-    >
+    <View style={styles.container}>
       <ScrollView>
         {logs.map((log, index) => (
-          <Text
-            key={index}
-            style={{
-              color: 'lime',
-              marginBottom: 4,
-              fontSize: 12,
-            }}
-          >
+          <Text key={index} style={styles.text}>
             {log.message}
           </Text>
         ))}
@@ -42,3 +25,29 @@ export function DebugOverlay() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+
+    bottom: 0,
+
+    left: 0,
+
+    right: 0,
+
+    height: 250,
+
+    backgroundColor: 'black',
+
+    padding: 10,
+  },
+
+  text: {
+    color: 'white',
+
+    marginBottom: 4,
+
+    fontSize: 12,
+  },
+});
